@@ -49,8 +49,11 @@ class WumpusWorld {
         } while (this.board[x][y] !== EMPTY);
         this.board[x][y] = GOLD;
           
-        
-        console.log(this.board.join(" "))
+        for(let row of this.board){
+          console.log(row.join("  "));
+          console.log("");
+        }
+
     }
   
     move(dx, dy) {
@@ -94,7 +97,7 @@ class WumpusWorld {
   
   // Create a new instance of the WumpusWorld game
   const game = new WumpusWorld();
-  game.createBoard();this
+  game.createBoard();
   
   // Example moves for the agent
 //   game.move(1, 0); // Move right
