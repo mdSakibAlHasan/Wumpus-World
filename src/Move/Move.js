@@ -1,6 +1,6 @@
 
 const SIZE=10;
-const PITNumber=10;
+const PITNumber=15;
 
 const EMPTY= 0;
 const PIT= 1;
@@ -8,6 +8,7 @@ const BREEZE= 2;
 const BUMP= 3;
 const WUMPUS= 5;
 const STENCH= 6;
+const BREEZEstench= 8;
 const SCREAM= 7;
 const GOLD= 10;
 const UNCOVER= 100;
@@ -24,6 +25,10 @@ class WumpusWorld {
       this.agentHasGold = false;
       this.agentHasArrow = true;
       this.gameOver = false;
+    }
+
+    validCheck(i, j) {
+        return i >= 0 && i < SIZE && j >= 0 && j < SIZE;
     }
 
     createBoard(){
@@ -62,8 +67,8 @@ class WumpusWorld {
 
     }
 
-    passingBoard(){
-      return this.board;
+    passingMove(i,j){
+      return this.checkAdjacentCell(this.board, i, j);
     }
   
     move(dx, dy) {
@@ -103,6 +108,33 @@ class WumpusWorld {
       // This includes detecting breeze, stench, and adjacent safe cells
       // You need to keep track of the game state based on agent's actions and perception.
     }
+
+    checkAdjacentCell(board, i, j) {
+        if(board[i][j] === PIT) return PIT;
+        else if(board[i][j] === WUMPUS) return WUMPUS;
+        else if(board[i][j] === GOLD) return GOLD;
+
+        let hasPit=false, hasWumpus=false;
+        const directions = [
+          [1, 0],
+          [0, 1],
+          [-1, 0],
+          [0, -1],
+        ];
+        for (const [px, py] of directions) {
+          const x = i + px;
+          const y = j + py;
+          if (this.validCheck(x, y) && board[x][y] === PIT) hasPit=true;
+          else if (this.validCheck(x, y) && board[x][y] === WUMPUS) hasWumpus=true;
+
+        }
+      
+        if(hasPit && hasWumpus) return BREEZEstench;
+        else if(hasPit) return BREEZE;
+        else if(hasWumpus) return STENCH;
+        else return EMPTY;
+        
+    }
 }
 
 
@@ -116,6 +148,7 @@ class Agent {
       this.agentHasArrow = true;
       this.gameOver = false;
       this.originalBoard;
+      this.game;
     }
 
 
@@ -128,15 +161,17 @@ class Agent {
     
 
     initiateTheGame(){
-        const game = new WumpusWorld();
-        game.createBoard();
-        this.originalBoard = game.passingBoard();
+        this.game = new WumpusWorld();
+        this.game.createBoard();
+        // this.originalBoard = game.passingBoard();
 
-        console.log("Here are the initial board");
-        for(let row of this.originalBoard){
-            console.log(row.join("  "));
-            console.log();
-        }
+        // console.log("Here are the initial board");
+        // for(let row of this.originalBoard){
+        //     console.log(row.join("  "));
+        //     console.log();
+        // }
+
+        this.findBestMove();
     }
 
 
@@ -146,15 +181,19 @@ class Agent {
         do {
             console.log("lests check ",count);
             let checkArray = this.createSaveMove(this.board);
+            console.log(checkArray, " here after get it")
             for(const point of checkArray){
-                console.log(point, " and status ",this.board[point[0]][point[1]]);
+                //console.log(point, " and status ",this.board[point[0]][point[1]]);
                 if(this.board[point[0]][point[1]] === UNCOVER){
-                    this.board[point[0]][point[1]] = EMPTY;     //send the point or the path to forntent
+                    const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
+                    if(this.checkStatus(status))
+                        break;
+                    this.board[point[0]][point[1]] = status;
                 }
             }
 
             count++;
-        } while (this.gameOver === false && count<5);
+        } while (this.gameOver === false && count<10);
 
         for(let row of this.board){
             console.log(row.join("  "));
@@ -163,8 +202,28 @@ class Agent {
 
     }
 
+    checkStatus(status){
+        console.log(status," is the status of original")
+        if(status === GOLD){
+            console.log("COngratulation you find the GOLD");
+            return true;
+        }
+        else if(status === WUMPUS){
+            console.log("Game Over. Wumpus found in this cell");
+            return true;
+        }
+        else if(status === PIT){
+            console.log("Game Over. You fall in PIT");
+            return true;
+        }
+        else{
+            return false
+        }
+    }
+
     createSaveMove(board){
         const checkArray = this.findAdjacentCell(board);
+        //console.log(checkArray, " here final  all possible")
         for(const point of checkArray){
             for (const [px, py] of this.directions) {
                 const x = point[0] + px;
@@ -179,6 +238,8 @@ class Agent {
             }
             
         }
+
+        //apply algorithm of propositional logic here
 
         return checkArray;
     }
@@ -212,7 +273,8 @@ class Agent {
         for (const [px, py] of this.directions) {
           const x = i + px;
           const y = j + py;
-          if (this.validCheck(x, y) && board[x][y] !== UNCOVER) return true;
+          if (this.validCheck(x, y) && board[x][y] === EMPTY) 
+            return true;
         }
       
         return false;
@@ -223,5 +285,5 @@ class Agent {
 
 const play = new Agent();
 play.initiateTheGame();
-play.findBestMove();
+//play.findBestMove();
 
