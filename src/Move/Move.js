@@ -2,18 +2,18 @@
 const SIZE=10;
 const PITNumber=15;
 
-const EMPTY= 0;
-const PIT= 1;
-const BREEZE= 2;
-const BUMP= 3;
-const WUMPUS= 5;
-const STENCH= 6;
-const BREEZEstench= 8;
-const SCREAM= 7;
-const GOLD= 10;
-const UNCOVER= 100;
-const CANpit= 51;
-const CANwumpus= 52;
+const EMPTY= 'e';
+const PIT= 'p';
+const BREEZE= 'b';
+//const BUMP= 3;
+const WUMPUS= 'w';
+const STENCH= 's';
+const BREEZEstench= 'bs';
+//const SCREAM= 7;
+const GOLD= 'g';
+const UNCOVER= 'u';
+const CANpit= 'cp';
+const CANwumpus= 'cw';
 
 
 
@@ -177,23 +177,22 @@ class Agent {
 
     findBestMove(){
         this.board[this.agentX][this.agentY] = EMPTY;
-        let count=0;
+        let count=0, checkArray;
         do {
             console.log("lests check ",count);
-            let checkArray = this.createSaveMove(this.board);
+            checkArray = this.createSaveMove(this.board);
             console.log(checkArray, " here after get it")
             for(const point of checkArray){
                 //console.log(point, " and status ",this.board[point[0]][point[1]]);
                 if(this.board[point[0]][point[1]] === UNCOVER){
                     const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
-                    if(this.checkStatus(status))
-                        break;
+                    this.checkStatus(status)                //check  if the gane end
                     this.board[point[0]][point[1]] = status;
                 }
             }
 
             count++;
-        } while (this.gameOver === false && count<10);
+        } while (this.gameOver === false && checkArray.length !==0);
 
         for(let row of this.board){
             console.log(row.join("  "));
@@ -206,18 +205,15 @@ class Agent {
         console.log(status," is the status of original")
         if(status === GOLD){
             console.log("COngratulation you find the GOLD");
-            return true;
+            this.gameOver = true;
         }
         else if(status === WUMPUS){
             console.log("Game Over. Wumpus found in this cell");
-            return true;
+            this.gameOver = true;
         }
         else if(status === PIT){
             console.log("Game Over. You fall in PIT");
-            return true;
-        }
-        else{
-            return false
+            this.gameOver = true;
         }
     }
 
