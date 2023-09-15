@@ -34,7 +34,7 @@ class Agent {
         this.board[this.agentX][this.agentY] = EMPTY;
         let count=0;
         do {
-            
+            console.log("lests check ",count);
             let checkArray = this.createSaveMove(this.board);
             for(const point of checkArray){
                 console.log(point, " and status ",this.board[point[0]][point[1]]);
@@ -46,6 +46,11 @@ class Agent {
             count++;
         } while (this.gameOver === false && count<5);
 
+        for(let row of this.board){
+            console.log(row.join("  "));
+            console.log();
+        }
+
     }
 
     createSaveMove(board){
@@ -54,10 +59,10 @@ class Agent {
             for (const [px, py] of this.directions) {
                 const x = point[0] + px;
                 const y = point[1] + py;
-                if (validCheck(x, y) && board[x][y] === BREEZE){
+                if (this.validCheck(x, y) && board[x][y] === BREEZE){
                     this.board[x][y] = CANpit;
                 }
-                else if(validCheck(x, y) && board[x][y] === STENCH){
+                else if(this.validCheck(x, y) && board[x][y] === STENCH){
                     this.board[x][y] = CANwumpus;
                 }
                 
@@ -82,6 +87,9 @@ class Agent {
         return pointArray;
     }
 
+    validCheck(i, j) {
+        return i >= 0 && i < SIZE && j >= 0 && j < SIZE;
+    }
    
       
     checkAdjacentCell(board, i, j) {
@@ -94,17 +102,13 @@ class Agent {
         for (const [px, py] of this.directions) {
           const x = i + px;
           const y = j + py;
-          if (validCheck(x, y) && board[x][y] !== UNCOVER) return true;
+          if (this.validCheck(x, y) && board[x][y] !== UNCOVER) return true;
         }
       
         return false;
     }
 
-    validCheck(i, j) {
-        return i >= 0 && i < SIZE && j >= 0 && j < SIZE;
-    }
-
-   
+ 
 }
 
 const play = new Agent();
