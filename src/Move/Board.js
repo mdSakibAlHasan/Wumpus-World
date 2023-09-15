@@ -1,5 +1,5 @@
 const SIZE=10;
-const PITNumber=10;
+const PITNumber=15;
 
 const EMPTY= 0;
 const PIT= 1;
@@ -10,7 +10,7 @@ const STENCH= 6;
 const SCREAM= 7;
 const GOLD= 10;
 
-class WumpusWorld {
+export class WumpusWorld {
     constructor() {
       this.board = Array(SIZE).fill(null).map(() => Array(SIZE).fill(EMPTY));
       this.agentX = 0;
@@ -29,16 +29,16 @@ class WumpusWorld {
         for (let i = 0; i < PITNumber; i++) {
         let x, y;
         do {
-            x = getRandomInt(2, SIZE - 1);
-            y = getRandomInt(2, SIZE - 1);
+            x = getRandomInt(1, SIZE - 1);
+            y = getRandomInt(1, SIZE - 1);
         } while (this.board[x][y] !== EMPTY);
         this.board[x][y] = PIT;
         }
 
         let x, y;
         do {                                           //place wuppus
-            x = getRandomInt(4, SIZE - 1);
-            y = getRandomInt(4, SIZE - 1);
+            x = getRandomInt(2, SIZE - 1);
+            y = getRandomInt(2, SIZE - 1);
         } while (this.board[x][y] !== EMPTY);
         this.board[x][y] = WUMPUS;
           
@@ -54,6 +54,10 @@ class WumpusWorld {
           console.log("");
         }
 
+    }
+
+    passingBoard(){
+      return this.board;
     }
   
     move(dx, dy) {
