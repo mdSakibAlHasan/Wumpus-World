@@ -1,6 +1,6 @@
 
 const SIZE=10;
-const PITNumber=15;
+const PITNumber=10;
 
 const EMPTY= 'e';
 const PIT= 'p';
@@ -12,8 +12,10 @@ const BREEZEstench= 'bs';
 //const SCREAM= 7;
 const GOLD= 'g';
 const UNCOVER= 'u';
+const SAFE= 's';
 const CANpit= 'cp';
 const CANwumpus= 'cw';
+const CANboth= 'cb';
 
 
 
@@ -180,13 +182,14 @@ class Agent {
         let count=0, checkArray;
         do {
             console.log("lests check ",count);
-            checkArray = this.createSaveMove(this.board);
+            checkArray = this.findAdjacentCell(this.board);
             console.log(checkArray, " here after get it")
             for(const point of checkArray){
                 //console.log(point, " and status ",this.board[point[0]][point[1]]);
-                if(this.board[point[0]][point[1]] === UNCOVER){
+                if(this.board[point[0]][point[1]] === SAFE){
                     const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
                     this.checkStatus(status)                //check  if the gane end
+                    console.log(status," is the status of ",point)
                     this.board[point[0]][point[1]] = status;
                 }
             }
@@ -199,10 +202,11 @@ class Agent {
             console.log();
         }
 
+        this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
+
     }
 
     checkStatus(status){
-        console.log(status," is the status of original")
         if(status === GOLD){
             console.log("COngratulation you find the GOLD");
             this.gameOver = true;
@@ -218,34 +222,82 @@ class Agent {
     }
 
     createSaveMove(board){
-        const checkArray = this.findAdjacentCell(board);
-        //console.log(checkArray, " here final  all possible")
-        for(const point of checkArray){
-            for (const [px, py] of this.directions) {
-                const x = point[0] + px;
-                const y = point[1] + py;
-                if (this.validCheck(x, y) && board[x][y] === BREEZE){
-                    this.board[x][y] = CANpit;
-                }
-                else if(this.validCheck(x, y) && board[x][y] === STENCH){
-                    this.board[x][y] = CANwumpus;
-                }
-                
+
+      for(let i=0;i<SIZE;i++){
+        for(let j=0;j<SIZE;j++){
+            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
+                this.checkSorounding(this.board, i, j, CANwumpus);
             }
-            
+            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
+              this.checkSorounding(this.board, i, j, CANpit);
+            }
         }
+      }
+
+
+        
+        //console.log(checkArray, " here final  all possible")
+        // for(const point of checkArray){
+        //     for (const [px, py] of this.directions) {
+        //         const x = point[0] + px;
+        //         const y = point[1] + py;
+        //         if (this.validCheck(x, y) && board[x][y] === BREEZE){
+        //           if(this.board[point[0]][point[1]] === CANwumpus)      //@update check that here vcan both and make both
+        //             this.board[point[0]][point[1]] = CANboth
+        //           else
+        //             this.board[point[0]][point[1]] = CANpit;
+        //         }
+        //         else if(this.validCheck(x, y) && board[x][y] === STENCH){
+        //           if(this.board[point[0]][point[1]] === CANpit)
+        //             this.board[point[0]][point[1]] = CANboth
+        //           else
+        //             this.board[point[0]][point[1]] = CANwumpus;
+        //         }
+                
+        //     }
+
+            
+        // }
 
         //apply algorithm of propositional logic here
+        //this.applyLogic();
 
-        return checkArray;
+        
     }
 
-    findAdjacentCell(board){
+
+    applyLogic(){                //find acctually there are pit or wumpus exixs or not
+      for(let i=0;i<SIZE;i++){
+        for(let j=0;j<SIZE;j++){
+            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
+                this.checkSorounding(this.board, i, j, CANwumpus);
+            }
+            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
+              this.checkSorounding(this.board, i, j, CANpit);
+            }
+        }
+      }
+    }   //apply here that here are actual pit and wumpus
+
+    checkSorounding(board, i, j, sensor){   //create safe if it not wumpus or pit
+
+      for (const [px, py] of this.directions) {
+        const x = i + px;
+        const y = j + py;
+        if (this.validCheck(x, y) && board[x][y] === EMPTY || board[x][y] === sensor) 
+          this.board[i][j] = SAFE;
+      }
+    
+    }
+
+
+    findAdjacentCell(board){          //return all the set of cell that has adjacent uncover cell
         const mySet = new Set();
         for(let i=0;i<SIZE;i++){
             for(let j=0;j<SIZE;j++){
                 if(board[i][j]===UNCOVER && this.checkAdjacentCell(board,i,j) ){
                     mySet.add([i,j]);
+                    this.board[i][j] = SAFE;
                 }
             }
         }
@@ -259,7 +311,7 @@ class Agent {
     }
    
       
-    checkAdjacentCell(board, i, j) {
+    checkAdjacentCell(board, i, j) {      //return if there any cell that is uncover
         const directions = [
           [1, 0],
           [0, 1],
