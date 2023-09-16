@@ -12,7 +12,7 @@ const BREEZEstench= 'bs';
 //const SCREAM= 7;
 const GOLD= 'g';
 const UNCOVER= 'u';
-const SAFE= 's';
+const SAFE= 'sa';
 const CANpit= 'cp';
 const CANwumpus= 'cw';
 const CANboth= 'cb';
@@ -204,6 +204,10 @@ class Agent {
 
         this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
 
+        for(let row of this.board){
+          console.log(row.join("  "));
+          console.log();
+      }
     }
 
     checkStatus(status){
@@ -223,45 +227,30 @@ class Agent {
 
     createSaveMove(board){
 
-      for(let i=0;i<SIZE;i++){
+      for(let i=0;i<SIZE;i++){      //check where there are wumpus or pit
         for(let j=0;j<SIZE;j++){
-            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
-                this.checkSorounding(this.board, i, j, CANwumpus);
+          if(board[i][j] === UNCOVER){
+            for (const [px, py] of this.directions) {
+              const x = i + px;
+              const y = j + py;
+              if (this.validCheck(x, y) && (board[x][y] === BREEZE || board[x][y] === BREEZEstench)){
+                if(this.board[i][j] === CANwumpus)      //@update check that here vcan both and make both
+                  this.board[i][j] = CANboth
+                else
+                  this.board[i][j] = CANpit;
+              }
+              else if(this.validCheck(x, y) && (board[x][y] === STENCH || board[x][y] === BREEZEstench )){
+                if(this.board[i][j] === CANpit)
+                  this.board[i][j] = CANboth
+                else
+                  this.board[i][j] = CANwumpus;
+              }
             }
-            if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
-              this.checkSorounding(this.board, i, j, CANpit);
-            }
+          }
         }
       }
 
-
-        
-        //console.log(checkArray, " here final  all possible")
-        // for(const point of checkArray){
-        //     for (const [px, py] of this.directions) {
-        //         const x = point[0] + px;
-        //         const y = point[1] + py;
-        //         if (this.validCheck(x, y) && board[x][y] === BREEZE){
-        //           if(this.board[point[0]][point[1]] === CANwumpus)      //@update check that here vcan both and make both
-        //             this.board[point[0]][point[1]] = CANboth
-        //           else
-        //             this.board[point[0]][point[1]] = CANpit;
-        //         }
-        //         else if(this.validCheck(x, y) && board[x][y] === STENCH){
-        //           if(this.board[point[0]][point[1]] === CANpit)
-        //             this.board[point[0]][point[1]] = CANboth
-        //           else
-        //             this.board[point[0]][point[1]] = CANwumpus;
-        //         }
-                
-        //     }
-
-            
-        // }
-
-        //apply algorithm of propositional logic here
-        //this.applyLogic();
-
+      this.applyLogic();
         
     }
 
@@ -281,11 +270,15 @@ class Agent {
 
     checkSorounding(board, i, j, sensor){   //create safe if it not wumpus or pit
 
-      for (const [px, py] of this.directions) {
+      for (const [px, py] of this.directions) {   //add here sure there are pit or wumpus
         const x = i + px;
         const y = j + py;
-        if (this.validCheck(x, y) && board[x][y] === EMPTY || board[x][y] === sensor) 
-          this.board[i][j] = SAFE;
+        if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] === sensor)){
+          if(this.board[i][j] === CANboth)
+            this.board[i][j] = sensor;
+          else
+            this.board[i][j] = SAFE;
+        }
       }
     
     }
