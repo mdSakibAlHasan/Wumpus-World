@@ -198,14 +198,14 @@ class Agent {
         } while (this.gameOver === false && checkArray.length !==0);
 
         for(let row of this.board){
-            console.log(row.join("  "));
+            console.log(row.join("    "));
             console.log();
         }
 
         this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
 
         for(let row of this.board){
-          console.log(row.join("  "));
+          console.log(row.join("    "));
           console.log();
       }
     }
@@ -259,10 +259,10 @@ class Agent {
       for(let i=0;i<SIZE;i++){
         for(let j=0;j<SIZE;j++){
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
-                this.checkSorounding(this.board, i, j, CANwumpus);
+                this.checkSorounding(this.board, i, j, STENCH);
             }
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
-              this.checkSorounding(this.board, i, j, CANpit);
+              this.checkSorounding(this.board, i, j, BREEZE);
             }
         }
       }
@@ -279,6 +279,9 @@ class Agent {
           else
             this.board[i][j] = SAFE;
         }
+        // else if(this.validCheck(x, y) && board[x][y] !== UNCOVER){
+
+        // }
       }
     
     }
