@@ -140,6 +140,121 @@ class WumpusWorld {
 }
 
 
+class Graph {
+  constructor() {
+    this.V=0;
+    this.adj = new Array(vertices).fill(null).map(() => []);
+  }
+
+  isKnown(board, i , j){
+    if(board[i][j] === EMPTY || board[i][j] === BREEZE || board[i][j] === STENCH ||board[i][j] === BREEZEstench || board[i][j] === SAFE ){
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
+  createGraph(board){
+    for(let i=0;i<SIZE;i++){
+      for(let j=0;j<SIZE;j++){
+        if(this.isKnown(board, i, j)){
+          this.V++;
+        }
+      }
+    }
+
+    for(let i=0;i<SIZE;i++){
+      for(let j=0;j<SIZE;j++){
+        if(this.isKnown(board, i, j)){
+          if(this.isKnown(board, i, j+1))
+            this.addEdge((i*10+j),(i*10+j+1));
+          else if(this.isKnown(board, i+1, j))
+            this.addEdge((i*10+j),((i+1)*10+j));
+        }
+      }
+    }
+  }
+
+  addEdge(u, v) {
+    this.adj[u].push(v);
+    this.adj[v].push(u);
+  }
+
+  BFS(s, d) {
+    const visited = new Array(this.V).fill(false);
+    const queue = [];
+
+    queue.push(s);
+    visited[s] = true;
+
+    const parent = new Array(this.V).fill(-1);
+
+    while (queue.length > 0) {
+      const u = queue.shift();
+
+      for (const v of this.adj[u]) {
+        if (!visited[v]) {
+          queue.push(v);
+          visited[v] = true;
+          parent[v] = u;
+        }
+      }
+    }
+
+    if (!visited[d]) {
+      return false;
+    }
+
+    const path = [];
+
+    while (d !== -1) {
+      path.push(d);
+      d = parent[d];
+    }
+
+    path.reverse();
+
+    return path;
+  }
+
+  findMinCostPath(s, d) {
+    const path = this.BFS(s, d);
+
+    if (!path) {
+      return -1;
+    }
+
+    return path.length - 1;
+  }
+}
+
+// Example usage:
+
+// const g = new Graph(6);
+
+// g.addEdge(0, 1);
+// g.addEdge(0, 2);
+// g.addEdge(1, 3);
+// g.addEdge(2, 3);
+// g.addEdge(3, 4);
+// g.addEdge(4, 5);
+
+// const path = g.BFS(4, 2);
+// console.log(path," is the path");
+// const s = 0;
+// const d = 5;
+
+// const cost = g.findMinCostPath(s, d);
+
+// if (cost === -1) {
+//   console.log("No path exists");
+// } else {
+//   console.log("The minimum cost path is", cost);
+// }
+
+
+
 
 class Agent {
     constructor() {
@@ -184,14 +299,28 @@ class Agent {
             console.log("lests check ",count);
             checkArray = this.findAdjacentCell(this.board);
             console.log(checkArray, " here after get it")
+            const graph = new Graph();
+            this.graph.createGraph(this.board);
+            let cost=Number.MAX_VALUE, lowestPath;
             for(const point of checkArray){
-                //console.log(point, " and status ",this.board[point[0]][point[1]]);
-                if(this.board[point[0]][point[1]] === SAFE){
-                    const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
-                    this.checkStatus(status)                //check  if the gane end
-                    console.log(status," is the status of ",point)
-                    this.board[point[0]][point[1]] = status;
+                //find here are the shortest path algorithm
+                const path = this.graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
+                console.log(path," is the path for explore");
+                if(path.length<cost){
+                  cost = path.length;
+                  lowestPath = path;
                 }
+
+                //add function to explore path
+
+                
+                //console.log(point, " and status ",this.board[point[0]][point[1]]);
+                // if(this.board[point[0]][point[1]] === SAFE){
+                //     const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
+                //     this.checkStatus(status)                //check  if the gane end
+                //     console.log(status," is the status of ",point)
+                //     this.board[point[0]][point[1]] = status;
+                // }
             }
 
             count++;
@@ -202,12 +331,14 @@ class Agent {
             console.log();
         }
 
-        this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
+        //this part when there are no move
+        
+      //   this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
 
-        for(let row of this.board){
-          console.log(row.join("    "));
-          console.log();
-      }
+      //   for(let row of this.board){
+      //     console.log(row.join("    "));
+      //     console.log();
+      // }
     }
 
     checkStatus(status){
@@ -317,7 +448,7 @@ class Agent {
         for (const [px, py] of this.directions) {
           const x = i + px;
           const y = j + py;
-          if (this.validCheck(x, y) && board[x][y] === EMPTY) 
+          if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] == SAFE)) 
             return true;
         }
       
@@ -327,7 +458,7 @@ class Agent {
  
 }
 
-const play = new Agent();
-play.initiateTheGame();
+// const play = new Agent();
+// play.initiateTheGame();
 //play.findBestMove();
 
