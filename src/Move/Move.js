@@ -142,12 +142,11 @@ class WumpusWorld {
 
 class Graph {
   constructor() {
-    this.V=0;
     this.adj;
   }
 
   isKnown(board, i , j){
-    if(board[i][j] === EMPTY || board[i][j] === BREEZE || board[i][j] === STENCH ||board[i][j] === BREEZEstench || board[i][j] === SAFE ){
+    if(i<10 && j<10 &&(board[i][j] === EMPTY || board[i][j] === BREEZE || board[i][j] === STENCH ||board[i][j] === BREEZEstench || board[i][j] === SAFE )){
       return true;
     }
     else{
@@ -156,40 +155,45 @@ class Graph {
   }
 
   createGraph(board){
+    // for(let i=0;i<SIZE;i++){
+    //   for(let j=0;j<SIZE;j++){
+    //     if(this.isKnown(board, i, j)){
+    //       this.V++;
+    //     }
+    //   }
+    // }
+
+    this.adj = new Array(100).fill(null).map(() => []);
+    //console.log(this.adj," is initial graph")
+
     for(let i=0;i<SIZE;i++){
       for(let j=0;j<SIZE;j++){
         if(this.isKnown(board, i, j)){
-          this.V++;
-        }
-      }
-    }
-
-    this.adj = new Array(this.V).fill(null).map(() => []);
-
-    for(let i=0;i<SIZE;i++){
-      for(let j=0;j<SIZE;j++){
-        if(this.isKnown(board, i, j)){
-          console.log(i,j);
+          //console.log(i,j);
           if(this.isKnown(board, i, j+1)){
             this.addEdge((i*10+j),(i*10+j+1));
-            console.log("left")
+            //console.log("left")
           }
-          else if(this.isKnown(board, i+1, j)){
+          if(this.isKnown(board, i+1, j)){
             this.addEdge((i*10+j),((i+1)*10+j));
-            console.log("down")
+            //console.log("down")
           }
         }
       }
     }
+
+    //console.log(this.adj," is after create graph")
+
   }
 
   addEdge(u, v) {
+    //console.log(u,"--" ,v)
     this.adj[u].push(v);
     this.adj[v].push(u);
   }
 
   BFS(s, d) {
-    console.log("The graph is ",this.adj);
+    //console.log("The graph is ",this.adj);
     const visited = new Array(this.V).fill(false);
     const queue = [];
 
@@ -310,14 +314,17 @@ class Agent {
         do {
             console.log("lests check ",count);
             checkArray = this.findAdjacentCell(this.board);
-            console.log(checkArray, " here after get it")
+            console.log(checkArray, " here after get it");
+            if(checkArray.length === 0){
+              break;
+            }
             const graph = new Graph();
             graph.createGraph(this.board);
             let cost=Number.MAX_VALUE, lowestPath, lowestPoint;
             for(const point of checkArray){
                 //find here are the shortest path algorithm
                 const path = graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
-                console.log(path," is the path for explore");
+                //console.log(path," is the path for explore");
                 if(path.length<cost){
                   cost = path.length;
                   lowestPath = path;
@@ -340,8 +347,10 @@ class Agent {
             this.checkStatus(status)                //check  if the gane end
             console.log(status," is the status of ",lowestPoint)
             this.board[lowestPoint[0]][lowestPoint[1]] = status;
+            this.agentX=lowestPoint[0];
+            this.agentY=lowestPoint[1];
             count++;
-        } while (this.gameOver === false && checkArray.length !==0);
+        } while (this.gameOver === false && checkArray.length !==0 && count<10);
 
         for(let row of this.board){
             console.log(row.join("    "));
