@@ -155,13 +155,6 @@ class Graph {
   }
 
   createGraph(board){
-    // for(let i=0;i<SIZE;i++){
-    //   for(let j=0;j<SIZE;j++){
-    //     if(this.isKnown(board, i, j)){
-    //       this.V++;
-    //     }
-    //   }
-    // }
 
     this.adj = new Array(100).fill(null).map(() => []);
     //console.log(this.adj," is initial graph")
@@ -232,30 +225,6 @@ class Graph {
 
 }
 
-// Example usage:
-
-// const g = new Graph(6);
-
-// g.addEdge(0, 1);
-// g.addEdge(0, 2);
-// g.addEdge(1, 3);
-// g.addEdge(2, 3);
-// g.addEdge(3, 4);
-// g.addEdge(4, 5);
-
-// const path = g.BFS(4, 2);
-// console.log(path," is the path");
-// const s = 0;
-// const d = 5;
-
-// const cost = g.findMinCostPath(s, d);
-
-// if (cost === -1) {
-//   console.log("No path exists");
-// } else {
-//   console.log("The minimum cost path is", cost);
-// }
-
 
 
 
@@ -325,13 +294,6 @@ class Agent {
                 //add function to explore path
 
                 this.board[point[0]][point[1]] = UNCOVER;
-                //console.log(point, " and status ",this.board[point[0]][point[1]]);
-                // if(this.board[point[0]][point[1]] === SAFE){
-                //     const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
-                //     this.checkStatus(status)                //check  if the gane end
-                //     console.log(status," is the status of ",point)
-                //     this.board[point[0]][point[1]] = status;
-                // }
             }
             console.log("This is the lowest path",lowestPath);
             const status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
@@ -478,5 +440,5 @@ class Agent {
 
 const play = new Agent();
 play.initiateTheGame();
-play.findBestMove();
+//play.findBestMove();
 
