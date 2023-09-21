@@ -318,6 +318,10 @@ class Agent {
       //     console.log(row.join("    "));
       //     console.log();
       // }
+      if(this.gameOver===false){
+        console.log("Probability part started")
+        this.createSaveMove(this.board);
+      }
     }
 
     checkStatus(status){
@@ -337,6 +341,7 @@ class Agent {
 
     createSaveMove(board){
 
+      const probability = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
       for(let i=0;i<SIZE;i++){      //check where there are wumpus or pit
         for(let j=0;j<SIZE;j++){
           if(board[i][j] === UNCOVER){
@@ -348,34 +353,72 @@ class Agent {
                   this.board[i][j] = CANboth
                 else
                   this.board[i][j] = CANpit;
+                probability[i][j]++;      ////later @update this using wumpus probability got more specific
               }
               else if(this.validCheck(x, y) && (board[x][y] === STENCH || board[x][y] === BREEZEstench )){
                 if(this.board[i][j] === CANpit)
                   this.board[i][j] = CANboth
                 else
                   this.board[i][j] = CANwumpus;
+
+                  probability[i][j]++;  //later @update this using wumpus probability got more specific
               }
             }
           }
         }
       }
 
-      this.applyLogic();
+      if(this.applyLogic(probability))
+        this.findBestMove();
         
     }
 
+    makeMovement(i,j){
+      console.log("make a probability movement");
+      this.board[i][j] = SAFE;
+      //replace it with another function
+      const graph = new Graph();
+      graph.createGraph(this.board);
+      const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
+      const status = this.game.passingMove(i, j);     //send the point or the path to forntent
+      this.checkStatus(status)                //check  if the gane end
+      console.log(status," is the status of ",i," - ",j)
+      this.board[i][j] = status;
+      this.agentX=i;
+      this.agentY=j;
+    }
 
-    applyLogic(){                //find acctually there are pit or wumpus exixs or not
+
+    applyLogic(probability){                //find acctually there are pit or wumpus exixs or not
       for(let i=0;i<SIZE;i++){
         for(let j=0;j<SIZE;j++){
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
-                this.checkSorounding(this.board, i, j, STENCH);
+                if(this.checkSorounding(this.board, i, j, STENCH)) return true
             }
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
-              this.checkSorounding(this.board, i, j, BREEZE);
+              if(this.checkSorounding(this.board, i, j, BREEZE)) return true;
             }
         }
       }
+
+      for(let row of this.board){
+        console.log(row.join("    "));
+        console.log();
+      }
+
+      //where there are low probability to get the pit it can explore this
+      for(let i=0;i<SIZE;i++){
+        for(let j=0;j<SIZE;j++){
+           if(probability[i][j] === 1){   //@update add here list and sort then find also 2 not only 1
+              this.makeMovement(i,j);
+              if(this.gameOver===false)
+                return true;
+           }
+        }
+      }
+
+      return false;
+
     }   //apply here that here are actual pit and wumpus
 
     checkSorounding(board, i, j, sensor){   //create safe if it not wumpus or pit
@@ -386,14 +429,14 @@ class Agent {
         if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] === sensor)){
           if(this.board[i][j] === CANboth)
             this.board[i][j] = sensor;
-          else
-            this.board[i][j] = SAFE;
+          else{
+            this.makeMovement(i,j);
+            return true;
+          }
         }
-        // else if(this.validCheck(x, y) && board[x][y] !== UNCOVER){
-
-        // }
+        
       }
-    
+      return false;
     }
 
 

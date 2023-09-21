@@ -1,17 +1,12 @@
-import './App.css';
-import Environment from './Environment/Environment';
-
-// import Homepage from './Pages/homePage';
-import ViewBoard from './Board/board.js'
+import './Board/design.css';
 import { Routes, Route} from "react-router-dom";
-// import Board from './Board/board';
+import Board from './Board/Home.js';
 
 function App() {
   return (
     <div className="App">
       <Routes>
-        {/* <Route path="/" element={<Homepage />} /> */}
-        <Route path="/" element={<Environment />} />
+        <Route path="/home" element={<Board/>} />
       </Routes>
     </div>
   );
