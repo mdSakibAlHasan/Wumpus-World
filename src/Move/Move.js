@@ -143,7 +143,7 @@ class WumpusWorld {
 class Graph {
   constructor() {
     this.V=0;
-    this.adj = new Array(vertices).fill(null).map(() => []);
+    this.adj;
   }
 
   isKnown(board, i , j){
@@ -164,13 +164,20 @@ class Graph {
       }
     }
 
+    this.adj = new Array(this.V).fill(null).map(() => []);
+
     for(let i=0;i<SIZE;i++){
       for(let j=0;j<SIZE;j++){
         if(this.isKnown(board, i, j)){
-          if(this.isKnown(board, i, j+1))
+          console.log(i,j);
+          if(this.isKnown(board, i, j+1)){
             this.addEdge((i*10+j),(i*10+j+1));
-          else if(this.isKnown(board, i+1, j))
+            console.log("left")
+          }
+          else if(this.isKnown(board, i+1, j)){
             this.addEdge((i*10+j),((i+1)*10+j));
+            console.log("down")
+          }
         }
       }
     }
@@ -182,6 +189,7 @@ class Graph {
   }
 
   BFS(s, d) {
+    console.log("The graph is ",this.adj);
     const visited = new Array(this.V).fill(false);
     const queue = [];
 
@@ -256,6 +264,10 @@ class Graph {
 
 
 
+
+
+
+
 class Agent {
     constructor() {
       this.board = Array(SIZE).fill(null).map(() => Array(SIZE).fill(UNCOVER));
@@ -300,20 +312,21 @@ class Agent {
             checkArray = this.findAdjacentCell(this.board);
             console.log(checkArray, " here after get it")
             const graph = new Graph();
-            this.graph.createGraph(this.board);
-            let cost=Number.MAX_VALUE, lowestPath;
+            graph.createGraph(this.board);
+            let cost=Number.MAX_VALUE, lowestPath, lowestPoint;
             for(const point of checkArray){
                 //find here are the shortest path algorithm
-                const path = this.graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
+                const path = graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
                 console.log(path," is the path for explore");
                 if(path.length<cost){
                   cost = path.length;
                   lowestPath = path;
+                  lowestPoint = point;
                 }
 
                 //add function to explore path
 
-                
+                this.board[point[0]][point[1]] = UNCOVER;
                 //console.log(point, " and status ",this.board[point[0]][point[1]]);
                 // if(this.board[point[0]][point[1]] === SAFE){
                 //     const status = this.game.passingMove(point[0], point[1]);     //send the point or the path to forntent
@@ -322,7 +335,11 @@ class Agent {
                 //     this.board[point[0]][point[1]] = status;
                 // }
             }
-
+            console.log("This is the lowest path",lowestPath);
+            const status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
+            this.checkStatus(status)                //check  if the gane end
+            console.log(status," is the status of ",lowestPoint)
+            this.board[lowestPoint[0]][lowestPoint[1]] = status;
             count++;
         } while (this.gameOver === false && checkArray.length !==0);
 
@@ -448,7 +465,8 @@ class Agent {
         for (const [px, py] of this.directions) {
           const x = i + px;
           const y = j + py;
-          if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] == SAFE)) 
+          //if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] === SAFE)) 
+          if (this.validCheck(x, y) && board[x][y] === EMPTY ) 
             return true;
         }
       
@@ -458,7 +476,7 @@ class Agent {
  
 }
 
-// const play = new Agent();
-// play.initiateTheGame();
-//play.findBestMove();
+const play = new Agent();
+play.initiateTheGame();
+play.findBestMove();
 
