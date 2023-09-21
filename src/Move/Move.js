@@ -194,13 +194,13 @@ class Graph {
 
   BFS(s, d) {
     //console.log("The graph is ",this.adj);
-    const visited = new Array(this.V).fill(false);
+    const visited = new Array(100).fill(false);
     const queue = [];
 
     queue.push(s);
     visited[s] = true;
 
-    const parent = new Array(this.V).fill(-1);
+    const parent = new Array(100).fill(-1);
 
     while (queue.length > 0) {
       const u = queue.shift();
@@ -230,15 +230,6 @@ class Graph {
     return path;
   }
 
-  findMinCostPath(s, d) {
-    const path = this.BFS(s, d);
-
-    if (!path) {
-      return -1;
-    }
-
-    return path.length - 1;
-  }
 }
 
 // Example usage:
@@ -350,7 +341,7 @@ class Agent {
             this.agentX=lowestPoint[0];
             this.agentY=lowestPoint[1];
             count++;
-        } while (this.gameOver === false && checkArray.length !==0 && count<10);
+        } while (this.gameOver === false && checkArray.length !==0);
 
         for(let row of this.board){
             console.log(row.join("    "));
