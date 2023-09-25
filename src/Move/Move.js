@@ -317,7 +317,7 @@ class Agent {
             this.board[lowestPoint[0]][lowestPoint[1]] = status;
             this.agentX=lowestPoint[0];
             this.agentY=lowestPoint[1];
-            this.totalPoint -= (path.length-1);
+            this.totalPoint -= (lowestPath.length-1);
             count++;
         } while (this.gameOver === false && checkArray.length !==0);
 
