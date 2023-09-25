@@ -24,8 +24,5 @@ yarn-error.log*
 push
 pull
 
-
-
-/src/Board
 /src/Environment
 /src/Agent
