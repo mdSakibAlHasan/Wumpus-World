@@ -1,6 +1,7 @@
 
 const SIZE=10;
 const PITNumber=10;
+const WUMPUSNumber=2;
 
 const EMPTY= 'e';
 const PIT= 'p';
@@ -48,14 +49,16 @@ class WumpusWorld {
         this.board[x][y] = PIT;
         }
 
-        let x, y;
-        do {                                           //place wuppus
-            x = getRandomInt(2, SIZE - 1);
-            y = getRandomInt(2, SIZE - 1);
-        } while (this.board[x][y] !== EMPTY);
-        this.board[x][y] = WUMPUS;
+        for (let i = 0; i < WUMPUSNumber; i++) {
+          let x, y;
+          do {                                           //place wuppus
+              x = getRandomInt(2, SIZE - 1);
+              y = getRandomInt(2, SIZE - 1);
+          } while (this.board[x][y] !== EMPTY);
+          this.board[x][y] = WUMPUS;
+        }
           
-        
+        let x,y;
         do {                                    //place gold
             x = getRandomInt(5, SIZE - 1);
             y = getRandomInt(5, SIZE - 1);
@@ -71,6 +74,15 @@ class WumpusWorld {
 
     passingMove(i,j){
       return this.checkAdjacentCell(this.board, i, j);
+    }
+
+    killWumpus(i,j){
+      if(this.board[i][j] === WUMPUS){
+        this.board[i][j] = EMPTY;
+        return true;
+      }else{
+        return false;
+      }
     }
   
     move(dx, dy) {
@@ -105,11 +117,6 @@ class WumpusWorld {
       this.updateKnowledge();
     }
   
-    updateKnowledge() {
-      // Implement your logic to update the board based on agent's perception
-      // This includes detecting breeze, stench, and adjacent safe cells
-      // You need to keep track of the game state based on agent's actions and perception.
-    }
 
     checkAdjacentCell(board, i, j) {
         if(board[i][j] === PIT) return PIT;
@@ -254,25 +261,27 @@ class Agent {
     
 
     initiateTheGame(){
-        this.game = new WumpusWorld();
-        this.game.createBoard();
-        // this.originalBoard = game.passingBoard();
-
-        // console.log("Here are the initial board");
-        // for(let row of this.originalBoard){
-        //     console.log(row.join("  "));
-        //     console.log();
-        // }
-
+      this.game = new WumpusWorld();
+      this.game.createBoard();
+      this.board[this.agentX][this.agentY] = EMPTY;
+      while(this.gameOver === false){
+        console.log("Here are agin find cell for empty cell")
         this.findBestMove();
+
+        if(this.gameOver===false){
+          console.log("Probability part started")
+          this.createSaveMove();
+        }
+      }
+        
+
     }
 
 
     findBestMove(){
-        this.board[this.agentX][this.agentY] = EMPTY;
         let count=0, checkArray;
         do {
-            console.log("lests check ",count);
+            //console.log("lests check ",count);
             checkArray = this.findAdjacentCell(this.board);
             console.log(checkArray, " here after get it");
             if(checkArray.length === 0){
@@ -282,23 +291,19 @@ class Agent {
             graph.createGraph(this.board);
             let cost=Number.MAX_VALUE, lowestPath, lowestPoint;
             for(const point of checkArray){
-                //find here are the shortest path algorithm
                 const path = graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
-                //console.log(path," is the path for explore");
                 if(path.length<cost){
                   cost = path.length;
                   lowestPath = path;
                   lowestPoint = point;
                 }
 
-                //add function to explore path
-
                 this.board[point[0]][point[1]] = UNCOVER;
             }
-            console.log("This is the lowest path",lowestPath);
+            //console.log("This is the lowest path",lowestPath);
             const status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
             this.checkStatus(status)                //check  if the gane end
-            console.log(status," is the status of ",lowestPoint)
+            //console.log(status," is the status of ",lowestPoint)
             this.board[lowestPoint[0]][lowestPoint[1]] = status;
             this.agentX=lowestPoint[0];
             this.agentY=lowestPoint[1];
@@ -309,19 +314,6 @@ class Agent {
             console.log(row.join("    "));
             console.log();
         }
-
-        //this part when there are no move
-        
-      //   this.createSaveMove(this.board);    //when there are no empty to move @update later try to fin better path 
-
-      //   for(let row of this.board){
-      //     console.log(row.join("    "));
-      //     console.log();
-      // }
-      if(this.gameOver===false){
-        console.log("Probability part started")
-        this.createSaveMove(this.board);
-      }
     }
 
     checkStatus(status){
@@ -339,38 +331,33 @@ class Agent {
         }
     }
 
-    createSaveMove(board){
-
+    convertedArray(sensor){
       const probability = Array(SIZE).fill(null).map(() => Array(SIZE).fill(0));
       for(let i=0;i<SIZE;i++){      //check where there are wumpus or pit
         for(let j=0;j<SIZE;j++){
-          if(board[i][j] === UNCOVER){
+          if(this.board[i][j] === EMPTY || this.board[i][j] === BREEZEstench || this.board[i][j] === sensor){
+            probability[i][j] = -1;
+          }
+          else if(this.board[i][j] === UNCOVER){
             for (const [px, py] of this.directions) {
               const x = i + px;
               const y = j + py;
-              if (this.validCheck(x, y) && (board[x][y] === BREEZE || board[x][y] === BREEZEstench)){
-                if(this.board[i][j] === CANwumpus)      //@update check that here vcan both and make both
-                  this.board[i][j] = CANboth
-                else
-                  this.board[i][j] = CANpit;
-                probability[i][j]++;      ////later @update this using wumpus probability got more specific
-              }
-              else if(this.validCheck(x, y) && (board[x][y] === STENCH || board[x][y] === BREEZEstench )){
-                if(this.board[i][j] === CANpit)
-                  this.board[i][j] = CANboth
-                else
-                  this.board[i][j] = CANwumpus;
-
-                  probability[i][j]++;  //later @update this using wumpus probability got more specific
+              if (this.validCheck(x, y) && (this.board[x][y] === sensor || this.board[x][y] === BREEZEstench)){
+                probability[i][j]++;                 
               }
             }
           }
         }
       }
 
-      if(this.applyLogic(probability))
-        this.findBestMove();
-        
+      return probability;
+    }
+
+    createSaveMove(){
+
+      const pitProbability = this.convertedArray(BREEZE);
+      const wumpusProbability = this.convertedArray(STENCH);    
+      this.applyLogic(pitProbability, wumpusProbability)              //try to logic apply here
     }
 
     makeMovement(i,j){
@@ -389,11 +376,11 @@ class Agent {
     }
 
 
-    applyLogic(probability){                //find acctually there are pit or wumpus exixs or not
+    applyLogic(probability, wumpusProbability){                //find acctually there are pit or wumpus exixs or not
       for(let i=0;i<SIZE;i++){
         for(let j=0;j<SIZE;j++){
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANpit ){
-                if(this.checkSorounding(this.board, i, j, STENCH)) return true
+              if(this.checkSorounding(this.board, i, j, STENCH)) return true
             }
             if(this.board[i][j]=== CANboth || this.board[i][j]=== CANwumpus ){
               if(this.checkSorounding(this.board, i, j, BREEZE)) return true;
@@ -401,7 +388,10 @@ class Agent {
         }
       }
 
-      for(let row of this.board){
+      if(this.tryKillWumpus(wumpusProbability))
+        return ;
+      console.log("No inferance apply here--------------------")
+      for(let row of probability){
         console.log(row.join("    "));
         console.log();
       }
@@ -409,21 +399,98 @@ class Agent {
       //where there are low probability to get the pit it can explore this
       for(let i=0;i<SIZE;i++){
         for(let j=0;j<SIZE;j++){
-           if(probability[i][j] === 1){   //@update add here list and sort then find also 2 not only 1
+           if(probability[i][j] === 1 && wumpusProbability[i][j] === 0){   //@update add here list and sort then find also 2 not only 1
               this.makeMovement(i,j);
-              if(this.gameOver===false)
-                return true;
+              return;
            }
         }
       }
 
-      return false;
+      return;
 
     }   //apply here that here are actual pit and wumpus
 
-    checkSorounding(board, i, j, sensor){   //create safe if it not wumpus or pit
 
-      for (const [px, py] of this.directions) {   //add here sure there are pit or wumpus
+    tryKillWumpus(wumpusProbability){
+      const mySet = new Set();
+        for(let i=0;i<SIZE;i++){
+            for(let j=0;j<SIZE;j++){
+                if(wumpusProbability[i][j] !==-1 && wumpusProbability[i][j] !==0 ){
+                  mySet.add([i,j]);
+                }
+            }
+        }
+
+        const myArray = Array.from(mySet);
+        if(myArray.length === 0)
+          return false;
+        myArray.sort((a, b) => {
+          const [x1, y1] = a;
+          const [x2, y2] = b;
+          const value1 = wumpusProbability[x1][y1];
+          const value2 = wumpusProbability[x2][y2];
+          return value2 - value1;
+        });
+        
+        const [highestX, highestY] = myArray[0];
+        const highestValue = wumpusProbability[highestX][highestY];
+        
+        console.log(`Highest Value: ${highestValue}`);
+        console.log(`Coordinates: (${highestX}, ${highestY})`);
+
+        //kill here
+        if(highestValue>=2){                                  //@update check here that arrow are here 
+          console.log("make a movement for kill wumpus");
+          let i,j;
+          for (const [px, py] of this.directions) {
+            const x = highestX + px;
+            const y = highestY + py;
+            if (this.validCheck(x, y) && (this.board[x][y] === EMPTY || this.board[x][y] === BREEZEstench || this.board[x][y] === BREEZE || this.board[x][y] === STENCH)){
+              i = x;
+              j = y;   
+              break;             
+            }
+          }
+          const graph = new Graph();
+          graph.createGraph(this.board);
+          const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
+          this.agentX=i;
+          this.agentY=j;
+               //send the point or the path to forntent
+          //this.checkStatus(status)                //check  if the gane end
+          if(this.game.killWumpus(highestX,highestY)){
+            const path = graph.BFS(this.agentX*10+this.agentY,highestX*10+highestY);
+            const status = this.game.passingMove(i, j);
+            console.log(status," is the status of ",i," - ",j)
+            this.board[i][j] = status;
+            this.agentX=highestX;
+            this.agentY=highestY;
+            console.log("Here wumpus are killed###########################");
+            //console.log(highestX," ",highestY);
+            //console.log(this.board)
+            for (const [px, py] of this.directions) {     //update currrent board
+              const x = highestX + px;
+              const y = highestY + py;
+              //console.log(x," ",y," ",px," ",py)
+              //console.log(this.board);
+              //console.log(this.board[x])
+              if (this.validCheck(x, y) && this.board[x][y] !== UNCOVER ){
+                this.board[x][y] = this.game.passingMove(x,y);        
+              }
+            }
+            return true;
+          }
+
+          return false;
+          
+        }
+        else
+          return false;
+
+    }
+
+    checkSorounding(board, i, j, sensor){             //create safe if it not wumpus or pit
+      for (const [px, py] of this.directions) {       //add here sure there are pit or wumpus
         const x = i + px;
         const y = j + py;
         if (this.validCheck(x, y) && (board[x][y] === EMPTY || board[x][y] === sensor)){
