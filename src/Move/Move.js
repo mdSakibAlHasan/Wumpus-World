@@ -2,6 +2,7 @@
 const SIZE=10;
 const PITNumber=10;
 const WUMPUSNumber=2;
+const GOLDNumber = 2;
 
 const EMPTY= 'e';
 const PIT= 'p';
@@ -249,6 +250,9 @@ class Agent {
       this.gameOver = false;
       this.originalBoard;
       this.game;
+      this.goldNumber = GOLDNumber;
+      this.totalPoint = 0;
+      this.numberOfWumpusKill=0;
     }
 
 
@@ -273,6 +277,11 @@ class Agent {
           this.createSaveMove();
         }
       }
+
+      console.log("Final statement: ");
+      console.log(this.totalPoint," is the point");
+      console.log((GOLD-this.goldNumber,"  gold found "))
+      console.log(this.numberOfWumpusKill," total wumpus kill")
         
 
     }
@@ -303,10 +312,12 @@ class Agent {
             //console.log("This is the lowest path",lowestPath);
             const status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
             this.checkStatus(status)                //check  if the gane end
-            //console.log(status," is the status of ",lowestPoint)
+            if(status===GOLD)
+              status=EMPTY;
             this.board[lowestPoint[0]][lowestPoint[1]] = status;
             this.agentX=lowestPoint[0];
             this.agentY=lowestPoint[1];
+            this.totalPoint -= (path.length-1);
             count++;
         } while (this.gameOver === false && checkArray.length !==0);
 
@@ -318,8 +329,10 @@ class Agent {
 
     checkStatus(status){
         if(status === GOLD){
+          this.totalPoint += 1000;
             console.log("COngratulation you find the GOLD");
-            this.gameOver = true;
+            if(--this.goldNumber==0)
+              this.gameOver = true;
         }
         else if(status === WUMPUS){
             console.log("Game Over. Wumpus found in this cell");
@@ -368,11 +381,14 @@ class Agent {
       graph.createGraph(this.board);
       const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
       const status = this.game.passingMove(i, j);     //send the point or the path to forntent
+      if(status===GOLD)
+        status=EMPTY;
       this.checkStatus(status)                //check  if the gane end
       console.log(status," is the status of ",i," - ",j)
       this.board[i][j] = status;
       this.agentX=i;
       this.agentY=j;
+      this.totalPoint -= (path.length-1);
     }
 
 
@@ -458,6 +474,7 @@ class Agent {
           this.agentY=j;
                //send the point or the path to forntent
           //this.checkStatus(status)                //check  if the gane end
+          this.totalPoint -= (path.length-1+10);
           if(this.game.killWumpus(highestX,highestY)){
             const path = graph.BFS(this.agentX*10+this.agentY,highestX*10+highestY);
             const status = this.game.passingMove(i, j);
@@ -478,6 +495,7 @@ class Agent {
                 this.board[x][y] = this.game.passingMove(x,y);        
               }
             }
+            this.totalPoint -= 1;
             return true;
           }
 
