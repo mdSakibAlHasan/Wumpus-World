@@ -1,6 +1,6 @@
 
 const SIZE=10;
-const PITNumber=10;
+const PITNumber=8;
 const WUMPUSNumber=2;
 const GOLDNumber = 2;
 
@@ -61,8 +61,8 @@ class WumpusWorld {
           
         let x,y;
         do {                                    //place gold
-            x = getRandomInt(5, SIZE - 1);
-            y = getRandomInt(5, SIZE - 1);
+            x = getRandomInt(3, SIZE - 1);
+            y = getRandomInt(3, SIZE - 1);
         } while (this.board[x][y] !== EMPTY);
         this.board[x][y] = GOLD;
           
@@ -122,7 +122,10 @@ class WumpusWorld {
     checkAdjacentCell(board, i, j) {
         if(board[i][j] === PIT) return PIT;
         else if(board[i][j] === WUMPUS) return WUMPUS;
-        else if(board[i][j] === GOLD) return GOLD;
+        else if(board[i][j] === GOLD){
+          this.board[i][j] = EMPTY;
+          return GOLD;
+        }
 
         let hasPit=false, hasWumpus=false;
         const directions = [
@@ -253,6 +256,7 @@ class Agent {
       this.goldNumber = GOLDNumber;
       this.totalPoint = 0;
       this.numberOfWumpusKill=0;
+      this.PITProbability=1;
     }
 
 
@@ -280,7 +284,7 @@ class Agent {
 
       console.log("Final statement: ");
       console.log(this.totalPoint," is the point");
-      console.log((GOLD-this.goldNumber,"  gold found "))
+      console.log((GOLDNumber-this.goldNumber),"  gold found ")
       console.log(this.numberOfWumpusKill," total wumpus kill")
         
 
@@ -310,10 +314,10 @@ class Agent {
                 this.board[point[0]][point[1]] = UNCOVER;
             }
             //console.log("This is the lowest path",lowestPath);
-            const status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
+            let status = this.game.passingMove(lowestPoint[0], lowestPoint[1]);     //send the point or the path to forntent
             this.checkStatus(status)                //check  if the gane end
             if(status===GOLD)
-              status=EMPTY;
+              status=this.game.passingMove(lowestPoint[0], lowestPoint[1]);
             this.board[lowestPoint[0]][lowestPoint[1]] = status;
             this.agentX=lowestPoint[0];
             this.agentY=lowestPoint[1];
@@ -380,9 +384,9 @@ class Agent {
       const graph = new Graph();
       graph.createGraph(this.board);
       const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
-      const status = this.game.passingMove(i, j);     //send the point or the path to forntent
+      let status = this.game.passingMove(i, j);     //send the point or the path to forntent
       if(status===GOLD)
-        status=EMPTY;
+        status=this.game.passingMove(i, j);
       this.checkStatus(status)                //check  if the gane end
       console.log(status," is the status of ",i," - ",j)
       this.board[i][j] = status;
@@ -415,13 +419,15 @@ class Agent {
       //where there are low probability to get the pit it can explore this
       for(let i=0;i<SIZE;i++){
         for(let j=0;j<SIZE;j++){
-           if(probability[i][j] === 1 && wumpusProbability[i][j] === 0){   //@update add here list and sort then find also 2 not only 1
+           if(probability[i][j] === this.PITProbability && wumpusProbability[i][j] === 0){   //@update add here list and sort then find also 2 not only 1
               this.makeMovement(i,j);
+              this.PITProbability=1;
               return;
            }
         }
       }
 
+      this.PITProbability++;      //there are no probability for PIT with 1 breeze
       return;
 
     }   //apply here that here are actual pit and wumpus
@@ -483,6 +489,7 @@ class Agent {
             this.agentX=highestX;
             this.agentY=highestY;
             console.log("Here wumpus are killed###########################");
+            this.numberOfWumpusKill++;
             //console.log(highestX," ",highestY);
             //console.log(this.board)
             for (const [px, py] of this.directions) {     //update currrent board
