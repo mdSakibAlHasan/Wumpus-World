@@ -2,7 +2,7 @@
 const SIZE=10;
 const PITNumber=8;
 const WUMPUSNumber=2;
-const GOLDNumber = 2;
+const GOLDNumber = 1;
 
 const EMPTY= 'e';
 const PIT= 'p';
@@ -35,36 +35,49 @@ class WumpusWorld {
         return i >= 0 && i < SIZE && j >= 0 && j < SIZE;
     }
 
-    createBoard(){
-        function getRandomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        }
-        
-          // Place pits randomly
-        for (let i = 0; i < PITNumber; i++) {
-        let x, y;
-        do {
-            x = getRandomInt(1, SIZE - 1);
-            y = getRandomInt(1, SIZE - 1);
-        } while (this.board[x][y] !== EMPTY);
-        this.board[x][y] = PIT;
-        }
 
-        for (let i = 0; i < WUMPUSNumber; i++) {
-          let x, y;
-          do {                                           //place wuppus
-              x = getRandomInt(2, SIZE - 1);
-              y = getRandomInt(2, SIZE - 1);
-          } while (this.board[x][y] !== EMPTY);
-          this.board[x][y] = WUMPUS;
-        }
+    createBoard(){
+      this.board=[
+        [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+        [EMPTY,EMPTY,PIT,EMPTY,EMPTY,EMPTY,PIT,EMPTY,EMPTY,EMPTY],
+        [EMPTY,EMPTY,EMPTY  ,EMPTY,EMPTY,WUMPUS,PIT,GOLD,EMPTY,EMPTY],
+        [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,WUMPUS],
+        [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,WUMPUS,EMPTY],
+        [EMPTY,EMPTY,PIT,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+        [WUMPUS,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+        [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,WUMPUS,WUMPUS,EMPTY,EMPTY,EMPTY],
+        [PIT,EMPTY,PIT,PIT,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+        [EMPTY,EMPTY,EMPTY,EMPTY,PIT,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY]
+      ]
+        // function getRandomInt(min, max) {
+        //     return Math.floor(Math.random() * (max - min + 1)) + min;
+        // }
+        
+        //   // Place pits randomly
+        // for (let i = 0; i < PITNumber; i++) {
+        // let x, y;
+        // do {
+        //     x = getRandomInt(1, SIZE - 1);
+        //     y = getRandomInt(1, SIZE - 1);
+        // } while (this.board[x][y] !== EMPTY);
+        // this.board[x][y] = PIT;
+        // }
+
+        // for (let i = 0; i < WUMPUSNumber; i++) {
+        //   let x, y;
+        //   do {                                           //place wuppus
+        //       x = getRandomInt(2, SIZE - 1);
+        //       y = getRandomInt(2, SIZE - 1);
+        //   } while (this.board[x][y] !== EMPTY);
+        //   this.board[x][y] = WUMPUS;
+        // }
           
-        let x,y;
-        do {                                    //place gold
-            x = getRandomInt(3, SIZE - 1);
-            y = getRandomInt(3, SIZE - 1);
-        } while (this.board[x][y] !== EMPTY);
-        this.board[x][y] = GOLD;
+        // let x,y;
+        // do {                                    //place gold
+        //     x = getRandomInt(3, SIZE - 1);
+        //     y = getRandomInt(3, SIZE - 1);
+        // } while (this.board[x][y] !== EMPTY);
+        // this.board[x][y] = GOLD;
           
         for(let row of this.board){
           console.log(row.join("  "));
@@ -95,7 +108,7 @@ class WumpusWorld {
       const newX = this.agentX + dx;
       const newY = this.agentY + dy;
   
-      if (newX < 0 || newX >= 10 || newY < 0 || newY >= 10) {
+      if (newX < 0 || newX >= SIZE || newY < 0 || newY >= SIZE) {
         console.log('Agent bumped into a wall.');
         return;
       }
@@ -157,7 +170,7 @@ class Graph {
   }
 
   isKnown(board, i , j){
-    if(i<10 && j<10 &&(board[i][j] === EMPTY || board[i][j] === BREEZE || board[i][j] === STENCH ||board[i][j] === BREEZEstench || board[i][j] === SAFE )){
+    if(i<SIZE && j<SIZE &&(board[i][j] === EMPTY || board[i][j] === BREEZE || board[i][j] === STENCH ||board[i][j] === BREEZEstench || board[i][j] === SAFE )){
       return true;
     }
     else{
@@ -167,7 +180,7 @@ class Graph {
 
   createGraph(board){
 
-    this.adj = new Array(100).fill(null).map(() => []);
+    this.adj = new Array(SIZE*SIZE).fill(null).map(() => []);
     //console.log(this.adj," is initial graph")
 
     for(let i=0;i<SIZE;i++){
@@ -175,11 +188,11 @@ class Graph {
         if(this.isKnown(board, i, j)){
           //console.log(i,j);
           if(this.isKnown(board, i, j+1)){
-            this.addEdge((i*10+j),(i*10+j+1));
+            this.addEdge((i*SIZE+j),(i*SIZE+j+1));
             //console.log("left")
           }
           if(this.isKnown(board, i+1, j)){
-            this.addEdge((i*10+j),((i+1)*10+j));
+            this.addEdge((i*SIZE+j),((i+1)*SIZE+j));
             //console.log("down")
           }
         }
@@ -198,13 +211,13 @@ class Graph {
 
   BFS(s, d) {
     //console.log("The graph is ",this.adj);
-    const visited = new Array(100).fill(false);
+    const visited = new Array(SIZE*SIZE).fill(false);
     const queue = [];
 
     queue.push(s);
     visited[s] = true;
 
-    const parent = new Array(100).fill(-1);
+    const parent = new Array(SIZE*SIZE).fill(-1);
 
     while (queue.length > 0) {
       const u = queue.shift();
@@ -304,7 +317,7 @@ class Agent {
             graph.createGraph(this.board);
             let cost=Number.MAX_VALUE, lowestPath, lowestPoint;
             for(const point of checkArray){
-                const path = graph.BFS(this.agentX*10+this.agentY,point[0]*10+point[1]);
+                const path = graph.BFS(this.agentX*SIZE+this.agentY,point[0]*SIZE+point[1]);
                 if(path.length<cost){
                   cost = path.length;
                   lowestPath = path;
@@ -383,7 +396,7 @@ class Agent {
       //replace it with another function
       const graph = new Graph();
       graph.createGraph(this.board);
-      const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
+      const path = graph.BFS(this.agentX*SIZE+this.agentY,i*SIZE+j);
       let status = this.game.passingMove(i, j);     //send the point or the path to forntent
       if(status===GOLD)
         status=this.game.passingMove(i, j);
@@ -475,14 +488,14 @@ class Agent {
           }
           const graph = new Graph();
           graph.createGraph(this.board);
-          const path = graph.BFS(this.agentX*10+this.agentY,i*10+j);
+          const path = graph.BFS(this.agentX*SIZE+this.agentY,i*SIZE+j);
           this.agentX=i;
           this.agentY=j;
                //send the point or the path to forntent
           //this.checkStatus(status)                //check  if the gane end
           this.totalPoint -= (path.length-1+10);
           if(this.game.killWumpus(highestX,highestY)){
-            const path = graph.BFS(this.agentX*10+this.agentY,highestX*10+highestY);
+            const path = graph.BFS(this.agentX*SIZE+this.agentY,highestX*SIZE+highestY);
             const status = this.game.passingMove(i, j);
             console.log(status," is the status of ",i," - ",j)
             this.board[i][j] = status;
