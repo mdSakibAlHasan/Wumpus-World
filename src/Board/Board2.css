@@ -1,78 +1,56 @@
-/* App.css */
-.App {
-  text-align: center;
+.container-fluid {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background-color: #93032E;
+	font-family: 'Jura', sans-serif;
+	color: white;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+table td {
+	border: 1px solid grey;
+	width: 80px;
+	height: 80px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.unvisited {
+	filter: opacity(70%);
+	background-color: white;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.safe {
+	background-color: #3BC14A;	
 }
 
-.App-link {
-  color: #61dafb;
+.stench {
+	background-color: #B84A62;
 }
 
-/* Cell styles */
-.cell {
-  height: 50px;
-  width: 50px;
-  border: 1px solid black;
-  display: inline-block;
-  background-color: rgb(37, 35, 35);
-  padding: 1px;
+.breeze {
+	background-color: #AC7B84;
 }
 
-.visited {
-  background-color: rgb(196, 187, 187);
+.breezestench {
+	background-color: #4C243B;
 }
 
-.Nvisited {
-  border: 2px solid green;
+.win {
+	margin: 10% 8%;
+	width: 250px;
+	height: 250px;
 }
 
-.pitCell {
-  background-color: rgb(0, 0, 0);
-  border: 1px solid red;
+.modal-win {
+	padding-top: 1%;
+	padding-bottom: 1%;
+}
+.text-win {
+	margin: 45%;
+	margin-bottom: 10%;
+	font-size: 30px;
 }
 
-.wumpusCell {
-  background-image: url(picW.jpg);
-  background-size: 50px 50px;
-}
-
-.breezeCell {
-  background-image: url(breezePic.PNG);
-  background-size: 50px 50px;
-}
-
-.snitchCell {
-  background-image: url(stenchPic.PNG);
-  background-size: 50px 50px;
-}
-
-.doubleCell {
-  background-image: url(doublePic.PNG);
-  background-size: 50px 50px;
-}
-
-.goldCell {
-  background-image: url(gold.jpg);
-  background-size: 50px 50px;
+.card-text, .card-title {
+	font-family: 'Jura', sans-serif;;
 }
