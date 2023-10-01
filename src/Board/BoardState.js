@@ -152,52 +152,7 @@ export class BoardState {
       return ret
   }
 
-  // setPossibleMovesForCell(nowOn){
-  //     this.cellProperties[nowOn].setVisited()
-  //     if(nowOn % 10 !== 0)
-  //         this.cellProperties[nowOn].setPossibleMoves(nowOn-1)
-  //     if(nowOn+1 % 10 !== 0)
-  //         this.cellProperties[nowOn].setPossibleMoves(nowOn+1)
-  //     if(nowOn-10 >= 0)
-  //         this.cellProperties[nowOn].setPossibleMoves(nowOn-10)
-  //     if(nowOn+10 < 100)
-  //         this.cellProperties[nowOn].setPossibleMoves(nowOn+10)
-  //     // if(nowOn % 10 !== 0 && this.input[nowOn-1] == 'S')
-  //     //     this.cellProperties[nowOn].setPossibleMoves(nowOn-1)
-  //     // if(nowOn+1 % 10 !== 0 && this.input[nowOn+1] == 'S')
-  //     //     this.cellProperties[nowOn].setPossibleMoves(nowOn+1)
-  //     // if(nowOn-10 >= 0 && this.input[nowOn-10] == 'S')
-  //     //     this.cellProperties[nowOn].setPossibleMoves(nowOn-10)
-  //     // if(nowOn+10 < 100 && this.input[nowOn+10] == 'S')
-  //     //     this.cellProperties[nowOn].setPossibleMoves(nowOn+10)
-  // }
-
-  // setConnectionBetweenCells(nowOn){
-  //     if(nowOn % 10 !== 0 && this.cellProperties[nowOn-1].getIsVisited()){
-  //         this.graph[nowOn][nowOn-1] = 1;
-  //         this.graph[nowOn-1][nowOn] = 1;
-  //         this.cellProperties[nowOn].setConnection(nowOn-1);
-  //         this.cellProperties[nowOn-1].setConnection(nowOn);
-  //     }
-  //     if((nowOn+1) % 10 !== 0 && this.cellProperties[nowOn+1].getIsVisited()){
-  //         this.graph[nowOn][nowOn+1] = 1;
-  //         this.graph[nowOn+1][nowOn] = 1;
-  //         this.cellProperties[nowOn].setConnection(nowOn+1);
-  //         this.cellProperties[nowOn+1].setConnection(nowOn);
-  //     }
-  //     if(nowOn-10 >= 0 && this.cellProperties[nowOn-10].getIsVisited()){
-  //         this.graph[nowOn][nowOn-10] = 1;
-  //         this.graph[nowOn-10][nowOn] = 1;
-  //         this.cellProperties[nowOn].setConnection(nowOn-10);
-  //         this.cellProperties[nowOn-10].setConnection(nowOn);
-  //     }
-  //     if(nowOn+10 < 100 && this.cellProperties[nowOn+10].getIsVisited()){
-  //         this.graph[nowOn][nowOn+10] = 1;
-  //         this.graph[nowOn+10][nowOn] = 1;
-  //         this.cellProperties[nowOn].setConnection(nowOn+10);
-  //         this.cellProperties[nowOn+10].setConnection(nowOn);
-  //     }
-  // }
+ 
 
   setAllSafe(index){
   if(index	%10 !== 0) 	    this.cellProperties[index-1].setSafe()
@@ -230,9 +185,7 @@ export class BoardState {
   if(index+10<100)if((index+10)    < 	100)    this.cellProperties[index+10].setNoWumpus()
 }
 
-  // getIsCellSafe(whichCell){
-  //     return this.cellProperties[whichCell].getIsCellSafe()
-  // }
+  
   getCellProps(index){
       return this.cellProperties[index].getProperties()
   }
@@ -240,16 +193,7 @@ export class BoardState {
 
   setCellClass(index,whichClass){this.cellClass[index] = whichClass}
 
-  // getConnectionWithCell(index){ // returns a set
-  //     return this.cellProperties[index].getConnections()
-  // }
-  // getPossibleMovesFromCell(index){ // returns a set
-  //     return this.cellProperties[index].getPossibleMoves()
-  // }
-
-  // getIsCellVisited(index){
-  //     return this.cellProperties[index].getIsVisited();
-  // }
+  
 
   getAvatar(index){
       if(this.inputcopy[index] === 'W') return 'wumpus'
